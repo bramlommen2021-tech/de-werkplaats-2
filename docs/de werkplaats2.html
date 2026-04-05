@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Workshop Aanmelding</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f4f4;
+      text-align: center;
+    }
+    .box {
+      background: white;
+      padding: 25px;
+      margin: 50px auto;
+      width: 350px;
+      border-radius: 12px;
+    }
+    input, button {
+      width: 90%;
+      padding: 10px;
+      margin: 6px;
+    }
+    button {
+      background: #FF0000;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .persoon {
+      border-top: 1px solid #ddd;
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+    .remove {
+      background: #999;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Workshop Aanmelding</h2>
+  <p id="status">Laden...</p>
+
+  <form onsubmit="sendData(event)">
+    <div id="personen"></div>
+
+    <button type="button" onclick="addPersoon()">+ Persoon toevoegen</button>
+    <button type="submit" id="btn">Aanmelden</button>
+  </form>
+
+  <p id="melding"></p>
+</div>
+
+<script>
+const URL = "https://script.google.com/macros/s/AKfycbyqxH-Ej9ydIyAAVKhAZWdM1KwzhnWR849qihaaCM_-uSKdLwlF1VS1c5tFKu_8LRkf/exec";
+const MAX = 10;
+
+let countPersoon = 0;
+
+// ➕ Persoon toevoegen
+function addPersoon() {
+  countPersoon++;
+
+  const div = document.createElement("div");
+  div.className = "persoon";
+  div.id = "persoon_" + countPersoon;
+
+  div.innerHTML = `
+    <h4>Persoon ${countPersoon}</h4>
+    <input placeholder="Naam" required>
+    <input type="number" placeholder="Leeftijd" required>
+    <input placeholder="Telefoon">
+    <input type="email" placeholder="Email">
+    <button type="button" class="remove" onclick="removePersoon(${countPersoon})">Verwijderen</button>
+  `;
+
+  document.getElementById("personen").appendChild(div);
+}
+
+// ❌ Persoon verwijderen
+function removePersoon(id) {
+  document.getElementById("persoon_" + id).remove();
+}
+
+// 📊 Aantal plekken ophalen
+function updateCount() {
+  fetch(URL)
+    .then(res => res.text())
+    .then(count => {
+      let num = Number(count);
+
+      if (isNaN(num)) {
+        document.getElementById("status").innerText = "Fout bij laden";
+        return;
+      }
+
+      let left = MAX - num;
+
+      document.getElementById("status").innerText =
+        left > 0 ? left + " plekken beschikbaar" : "Workshop is VOL";
+
+      if (left <= 0) document.getElementById("btn").disabled = true;
+    });
+}
+
+// 🚀 Verzenden
+function sendData(e) {
+  e.preventDefault();
+
+  const personenDivs = document.querySelectorAll(".persoon");
+  let personen = [];
+
+  personenDivs.forEach(div => {
+    const inputs = div.querySelectorAll("input");
+
+    personen.push({
+      naam: inputs[0].value,
+      leeftijd: inputs[1].value,
+      telefoon: inputs[2].value,
+      email: inputs[3].value
+    });
+  });
+
+  if (personen.length === 0) {
+    alert("Voeg minstens 1 persoon toe");
+    return;
+  }
+
+  fetch(URL, {
+    method: "POST",
+    body: JSON.stringify(personen),
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    }
+  })
+  .then(res => res.text())
+  .then(result => {
+    document.getElementById("melding").innerText =
+      result === "VOL"
+        ? "Niet genoeg plekken beschikbaar!"
+        : "Aanmelding gelukt!";
+
+    document.getElementById("personen").innerHTML = "";
+    countPersoon = 0;
+
+    addPersoon(); // reset met 1 persoon
+    updateCount();
+  });
+}
+
+// start met 1 persoon
+addPersoon();
+updateCount();
+</script>
+
+</body>
+</html>
