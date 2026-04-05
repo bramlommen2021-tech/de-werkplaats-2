@@ -43,7 +43,7 @@
 
 <div class="box">
   <h2>Workshop Aanmelding</h2>
-  <p id="status">Laden...</p>
+  <p id="status">Klik op aanmelden om je in te schrijven</p>
 
   <form onsubmit="sendData(event)">
     <div id="personen"></div>
@@ -57,7 +57,6 @@
 
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbwDv_VAKusEevytSubm1azKdFETh6O0I8ROY-qFzdi_GQltpxJVGTphOjByThyysSJp/exec";
-const MAX = 10;
 
 let countPersoon = 0;
 
@@ -83,35 +82,11 @@ function addPersoon() {
 
 // ❌ Persoon verwijderen
 function removePersoon(id) {
-  document.getElementById("persoon_" + id).remove();
+  const el = document.getElementById("persoon_" + id);
+  if (el) el.remove();
 }
 
-// 📊 Aantal plekken ophalen
-function updateCount() {
-  fetch(URL) // ✅ gewoon GET gebruiken
-    .then(res => res.json())
-    .then(data => {
-      let num = data.count;
-
-      if (isNaN(num)) {
-        document.getElementById("status").innerText = "Fout bij laden";
-        return;
-      }
-
-      let left = MAX - num;
-
-      document.getElementById("status").innerText =
-        left > 0 ? left + " plekken beschikbaar" : "Workshop is VOL";
-
-      if (left <= 0) document.getElementById("btn").disabled = true;
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("status").innerText = "Verbinding mislukt";
-    });
-}
-
-// 🚀 Verzenden
+// 🚀 Verzenden (CORS FIX)
 function sendData(e) {
   e.preventDefault();
 
@@ -134,31 +109,36 @@ function sendData(e) {
     return;
   }
 
+  // knop uitschakelen (voorkomt dubbel klikken)
+  document.getElementById("btn").disabled = true;
+  document.getElementById("melding").innerText = "Bezig met verzenden...";
+
   fetch(URL, {
     method: "POST",
+    mode: "no-cors", // 🔥 BELANGRIJK
     body: JSON.stringify(personen),
     headers: {
       "Content-Type": "text/plain;charset=utf-8"
     }
   })
-  .then(res => res.text())
-  .then(result => {
-    document.getElementById("melding").innerText =
-      result === "VOL"
-        ? "Niet genoeg plekken beschikbaar!"
-        : "Aanmelding gelukt!";
+  .then(() => {
+    document.getElementById("melding").innerText = "✅ Aanmelding gelukt!";
 
     document.getElementById("personen").innerHTML = "";
     countPersoon = 0;
 
-    addPersoon(); // reset met 1 persoon
-    updateCount();
+    addPersoon();
+    document.getElementById("btn").disabled = false;
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("melding").innerText = "❌ Fout bij verzenden";
+    document.getElementById("btn").disabled = false;
   });
 }
 
 // start met 1 persoon
 addPersoon();
-updateCount();
 </script>
 
 </body>
