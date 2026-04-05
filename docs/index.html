@@ -88,16 +88,10 @@ function removePersoon(id) {
 
 // 📊 Aantal plekken ophalen
 function updateCount() {
-  fetch(url, {
-  method: "POST",
-  headers: {
-    "Content-Type": "text/plain"
-  },
-  body: JSON.stringify(data)
-})
-    .then(res => res.text())
-    .then(count => {
-      let num = Number(count);
+  fetch(URL) // ✅ gewoon GET gebruiken
+    .then(res => res.json())
+    .then(data => {
+      let num = data.count;
 
       if (isNaN(num)) {
         document.getElementById("status").innerText = "Fout bij laden";
@@ -110,6 +104,10 @@ function updateCount() {
         left > 0 ? left + " plekken beschikbaar" : "Workshop is VOL";
 
       if (left <= 0) document.getElementById("btn").disabled = true;
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("status").innerText = "Verbinding mislukt";
     });
 }
 
