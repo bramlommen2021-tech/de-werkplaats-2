@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <head>
   <title>Workshop Aanmelding</title>
+  <p id="status">Laden...</p>
   <style>
     body {
       font-family: Arial;
@@ -84,6 +85,22 @@ function removePersoon(id) {
   const el = document.getElementById("persoon_" + id);
   if (el) el.remove();
 }
+  function updateCount() {
+  const script = document.createElement("script");
+  script.src = URL + "?callback=handleCount";
+  document.body.appendChild(script);
+}
+
+function handleCount(data) {
+  const status = document.getElementById("status");
+
+  if (data.left > 0) {
+    status.innerText = data.left + " plekken beschikbaar";
+  } else {
+    status.innerText = "Workshop is VOL";
+    document.getElementById("btn").disabled = true;
+  }
+}
 
 // 🚀 Verzenden (CORS FIX)
 function sendData(e) {
@@ -138,6 +155,7 @@ function sendData(e) {
 
 // start met 1 persoon
 addPersoon();
+updateCount();
 </script>
 
 </body>
