@@ -60,26 +60,39 @@
 const URL = "https://script.google.com/macros/s/AKfycbwYuCOy_-bymj5keq37-nilHyWO6OxPP-iYBSXJtPRoOeS3Fdj5ihawuNxpUVUjBbiu/exec";
 let countPersoon = 0;
 
-// ➕ Persoon toevoegen
 function addPersoon() {
-  const countPersoon = document.querySelectorAll(".persoon").length + 1;
+  const container = document.getElementById("personen");
+  const count = container.children.length + 1;
 
   const div = document.createElement("div");
   div.className = "persoon";
-  div.id = "persoon_" + countPersoon;
 
   div.innerHTML = `
-    <h4>Persoon ${countPersoon}</h4>
+    <h4>Persoon ${count}</h4>
     <input placeholder="Naam" required>
     <input type="number" placeholder="Leeftijd" required>
     <input placeholder="Telefoon">
     <input type="email" placeholder="Email">
-    <button type="button" class="remove" onclick="removePersoon(${countPersoon})">Verwijderen</button>
+    <button type="button" class="remove">Verwijderen</button>
   `;
 
-  document.getElementById("personen").appendChild(div);
-}
+  // verwijder knop werkt altijd goed
+  div.querySelector(".remove").onclick = () => {
+    div.remove();
+    updateLabels(); // 🔥 hernummeren
+  };
 
+  container.appendChild(div);
+
+  updateLabels(); // 🔥 ook na toevoegen
+}
+function updateLabels() {
+  const personen = document.querySelectorAll(".persoon");
+
+  personen.forEach((div, index) => {
+    div.querySelector("h4").innerText = "Persoon " + (index + 1);
+  });
+}
 // ❌ Persoon verwijderen
 function removePersoon(id) {
   const el = document.getElementById("persoon_" + id);
@@ -141,7 +154,7 @@ function sendData(e) {
     document.getElementById("melding").innerText = "✅ Aanmelding gelukt!";
 
     document.getElementById("personen").innerHTML = "";
-    countPersoon = 0;
+  
 
     addPersoon();
     document.getElementById("btn").disabled = false;
