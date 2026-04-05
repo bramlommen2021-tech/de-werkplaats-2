@@ -62,7 +62,7 @@ let countPersoon = 0;
 
 // ➕ Persoon toevoegen
 function addPersoon() {
-  countPersoon++;
+  const countPersoon = document.querySelectorAll(".persoon").length + 1;
 
   const div = document.createElement("div");
   div.className = "persoon";
