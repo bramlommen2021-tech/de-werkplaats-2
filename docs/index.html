@@ -58,6 +58,7 @@
 
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbwYuCOy_-bymj5keq37-nilHyWO6OxPP-iYBSXJtPRoOeS3Fdj5ihawuNxpUVUjBbiu/exec";
+let beschikbarePlekken = 0;
 let countPersoon = 0;
 
 function addPersoon() {
@@ -105,6 +106,8 @@ function removePersoon(id) {
 }
 
 function handleCount(data) {
+  beschikbarePlekken = data.left; // 👈 BELANGRIJK
+
   const status = document.getElementById("status");
 
   if (data.left > 0) {
@@ -114,7 +117,6 @@ function handleCount(data) {
     document.getElementById("btn").disabled = true;
   }
 }
-
 // 🚀 Verzenden (CORS FIX)
 function sendData(e) {
   e.preventDefault();
@@ -141,7 +143,12 @@ function sendData(e) {
   // knop uitschakelen (voorkomt dubbel klikken)
   document.getElementById("btn").disabled = true;
   document.getElementById("melding").innerText = "Bezig met verzenden...";
+const aantal = document.querySelectorAll(".persoon").length;
 
+if (aantal > beschikbarePlekken) {
+  alert("Er zijn nog maar " + beschikbarePlekken + " plekken!");
+  return;
+}
   fetch(URL, {
     method: "POST",
     mode: "no-cors", // 🔥 BELANGRIJK
