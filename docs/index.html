@@ -54,6 +54,9 @@
    <button type="submit" id="btn">Aanmelden</button>
    <button type="button" onclick="addPersoon()">+ Persoon toevoegen</button>
   </form>
+  <button type="submit" id="btn">Aanmelden</button>
+<button type="button" onclick="addPersoon()">+ Persoon toevoegen</button>
+<button type="button" onclick="removeLast()">Verwijderen</button>
 
   <p id="melding"></p>
 </div>
@@ -76,7 +79,12 @@ function addPersoon() {
     <input type="number" placeholder="Leeftijd" required>
     <input placeholder="Telefoon">
     <input type="email" placeholder="Email">
-    <button type="button" class="remove">Verwijderen</button>
+    function removeLast() {
+  const container = document.getElementById("personen");
+  if (container.lastElementChild) {
+    container.lastElementChild.remove();
+  }
+}
   `;
 
   // verwijder knop werkt altijd goed
