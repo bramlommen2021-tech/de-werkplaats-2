@@ -61,8 +61,8 @@
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbwYuCOy_-bymj5keq37-nilHyWO6OxPP-iYBSXJtPRoOeS3Fdj5ihawuNxpUVUjBbiu/exec";
 let beschikbarePlekken = 0;
-let countPersoon = 0;
 
+// ➕ Persoon toevoegen
 function addPersoon() {
   const container = document.getElementById("personen");
   const count = container.children.length + 1;
@@ -76,45 +76,28 @@ function addPersoon() {
     <input type="number" placeholder="Leeftijd" required>
     <input placeholder="Telefoon">
     <input type="email" placeholder="Email">
-    function removeLast() {
+  `;
+
+  container.appendChild(div);
+}
+
+// ❌ Laatste persoon verwijderen
+function removeLast() {
   const container = document.getElementById("personen");
   if (container.lastElementChild) {
     container.lastElementChild.remove();
   }
 }
-  `;
 
-  // verwijder knop werkt altijd goed
-  div.querySelector(".remove").onclick = () => {
-    div.remove();
-    updateLabels(); // 🔥 hernummeren
-  };
-
-  container.appendChild(div);
-
-  updateLabels(); // 🔥 ook na toevoegen
-  addPersoon();
-}
-function updateLabels() {
-  const personen = document.querySelectorAll(".persoon");
-
-  personen.forEach((div, index) => {
-    div.querySelector("h4").innerText = "Persoon " + (index + 1);
-  });
-}
-// ❌ Persoon verwijderen
-function removePersoon(id) {
-  const el = document.getElementById("persoon_" + id);
-  if (el) el.remove();
-}
-  function updateCount() {
+// 📊 Teller ophalen
+function updateCount() {
   const script = document.createElement("script");
   script.src = URL + "?callback=handleCount";
   document.body.appendChild(script);
 }
 
 function handleCount(data) {
-  beschikbarePlekken = data.left; // 👈 BELANGRIJK
+  beschikbarePlekken = data.left;
 
   const status = document.getElementById("status");
 
@@ -125,7 +108,8 @@ function handleCount(data) {
     document.getElementById("btn").disabled = true;
   }
 }
-// 🚀 Verzenden (CORS FIX)
+
+// 🚀 Verzenden
 function sendData(e) {
   e.preventDefault();
 
@@ -148,18 +132,19 @@ function sendData(e) {
     return;
   }
 
-  // knop uitschakelen (voorkomt dubbel klikken)
+  const aantal = personen.length;
+
+  if (aantal > beschikbarePlekken) {
+    alert("Er zijn nog maar " + beschikbarePlekken + " plekken!");
+    return;
+  }
+
   document.getElementById("btn").disabled = true;
   document.getElementById("melding").innerText = "Bezig met verzenden...";
-const aantal = document.querySelectorAll(".persoon").length;
 
-if (aantal > beschikbarePlekken) {
-  alert("Er zijn nog maar " + beschikbarePlekken + " plekken!");
-  return;
-}
   fetch(URL, {
     method: "POST",
-    mode: "no-cors", // 🔥 BELANGRIJK
+    mode: "no-cors",
     body: JSON.stringify(personen),
     headers: {
       "Content-Type": "text/plain;charset=utf-8"
@@ -167,24 +152,20 @@ if (aantal > beschikbarePlekken) {
   })
   .then(() => {
     document.getElementById("melding").innerText = "✅ Aanmelding gelukt!";
-
     document.getElementById("personen").innerHTML = "";
-  
-
     addPersoon();
     document.getElementById("btn").disabled = false;
   })
-  .catch(err => {
-    console.error(err);
+  .catch(() => {
     document.getElementById("melding").innerText = "❌ Fout bij verzenden";
     document.getElementById("btn").disabled = false;
   });
 }
 
-// start met 1 persoon
+// 🚀 START
 addPersoon();
 updateCount();
-setInterval(updateCount, 2000); // elke 2 seconden refresh
+setInterval(updateCount, 2000);
 </script>
 
 </body>
